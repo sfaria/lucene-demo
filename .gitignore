@@ -1,5 +1,6 @@
 *.class
 client/libs/*
+books
 
 # Package Files #
 *.jar
