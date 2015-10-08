@@ -1,6 +1,7 @@
 package com.demo.web;
 
 import com.demo.lucene.BookIndexer;
+import com.demo.lucene.BookSearcher;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -22,6 +23,7 @@ public final class BookSearchServer {
 
     public static void main(String[] args) throws IOException {
         // set up lucene objects
+        BookSearcher searcher = new BookSearcher(INDEX_PATH);
         BookIndexer indexer = new BookIndexer(RAW_DATA_PATH, INDEX_PATH);
         indexer.performFullIndexing();
 
@@ -34,6 +36,6 @@ public final class BookSearchServer {
             return "Hello, World!";
         });
 
-
+        
     }
 }
