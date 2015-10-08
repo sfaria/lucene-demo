@@ -1,12 +1,15 @@
 package com.demo.lucene;
 
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.highlight.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 
@@ -40,13 +43,40 @@ public final class BookSearcher {
 
     // -------------------- Public Methods --------------------
 
-    public final List<Document> search(String searchText) throws ParseException, IOException {
-        ScoreDoc[] hits = searcher.search(queryParser.parse(searchText), MAX_HITS).scoreDocs;
-        List<Document> docs = new ArrayList<>();
+    public final List<SearchResult> search(String searchText) throws ParseException, IOException, InvalidTokenOffsetsException {
+        Query query = queryParser.parse(searchText);
+        ScoreDoc[] hits = searcher.search(query, MAX_HITS).scoreDocs;
+        Highlighter highlighter = new Highlighter(new QueryScorer(query));
+
+        List<SearchResult> results = new ArrayList<>();
         for (int i = 0; i < hits.length; i++) {
             ScoreDoc hit = hits[i];
-            docs.add(searcher.doc(hit.doc));
+            int docId = hit.doc;
+            Document doc = searcher.doc(docId);
+            String text = doc.get("content");
+            TokenStream tokenStream = getTokenStream(docId);
+            TextFragment[] fragments = highlighter.getBestTextFragments(tokenStream, text, false, 5);
+            List<String> matches = new ArrayList<>();
+            for (int j = 0; j < fragments.length; j++) {
+                TextFragment fragment = fragments[j];
+                if (fragment != null && fragment.getScore() > 0) {
+                    matches.add(fragment.toString());
+                }
+            }
+            results.add(new SearchResult(matches));
         }
-        return docs;
+        return results;
+    }
+
+    // -------------------- Private Methods --------------------
+
+    @SuppressWarnings("deprecation")
+    private TokenStream getTokenStream(int docId) throws IOException {
+        return TokenSources.getAnyTokenStream(
+                searcher.getIndexReader(),
+                docId,
+                "content",
+                new StandardAnalyzer()
+        );
     }
 }
