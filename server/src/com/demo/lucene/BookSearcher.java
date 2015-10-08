@@ -29,15 +29,13 @@ public final class BookSearcher {
 
     // -------------------- Private Variables --------------------
 
-    private final IndexSearcher searcher;
     private final QueryParser queryParser;
+    private final Directory directory;
 
     // -------------------- Constructor --------------------
 
     public BookSearcher(Path indexPath) throws IOException {
-        Directory directory = FSDirectory.open(indexPath);
-        DirectoryReader directoryReader = DirectoryReader.open(directory);
-        this.searcher = new IndexSearcher(directoryReader);
+        this.directory = FSDirectory.open(indexPath);
         this.queryParser = new QueryParser("content", new StandardAnalyzer());
     }
 
@@ -45,6 +43,7 @@ public final class BookSearcher {
 
     public final List<SearchResult> search(String searchText) throws ParseException, IOException, InvalidTokenOffsetsException {
         Query query = queryParser.parse(searchText);
+        IndexSearcher searcher = createSearcher();
         ScoreDoc[] hits = searcher.search(query, MAX_HITS).scoreDocs;
         Highlighter highlighter = new Highlighter(new QueryScorer(query));
 
@@ -54,7 +53,7 @@ public final class BookSearcher {
             int docId = hit.doc;
             Document doc = searcher.doc(docId);
             String text = doc.get("content");
-            TokenStream tokenStream = getTokenStream(docId);
+            TokenStream tokenStream = getTokenStream(docId, searcher);
             TextFragment[] fragments = highlighter.getBestTextFragments(tokenStream, text, false, 5);
             List<String> matches = new ArrayList<>();
             for (int j = 0; j < fragments.length; j++) {
@@ -70,8 +69,13 @@ public final class BookSearcher {
 
     // -------------------- Private Methods --------------------
 
+    private IndexSearcher createSearcher() throws IOException {
+        DirectoryReader directoryReader = DirectoryReader.open(directory);
+        return new IndexSearcher(directoryReader);
+    }
+
     @SuppressWarnings("deprecation")
-    private TokenStream getTokenStream(int docId) throws IOException {
+    private TokenStream getTokenStream(int docId, IndexSearcher searcher) throws IOException {
         return TokenSources.getAnyTokenStream(
                 searcher.getIndexReader(),
                 docId,

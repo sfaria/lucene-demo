@@ -5,6 +5,8 @@ import com.demo.lucene.BookSearcher;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -42,7 +44,8 @@ public final class BookSearchServer {
         });
 
         get("/", (request, response) -> {
-            return "Hello, World!";
+            byte[] encoded = Files.readAllBytes(Paths.get("client", "index.html"));
+            return new String(encoded, StandardCharsets.UTF_8);
         });
 
         get("/search/:searchText", (request, response) -> {
