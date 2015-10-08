@@ -32,7 +32,7 @@ public final class BookSearchServer {
 
         // configure spark
         port(9090);
-        externalStaticFileLocation("client/libs");
+        externalStaticFileLocation("client");
 
         // server routes
         exception(Exception.class, (e, request, response) -> {
