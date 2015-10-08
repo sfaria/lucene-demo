@@ -70,12 +70,21 @@ public final class BookIndexer {
 
     private void indexRecord(InputStream in, IndexWriter writer) {
         Document doc = new Document();
-        try (Reader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
             doc.add(new LongField("created", new Date().getTime(), Field.Store.YES));
-            doc.add(new TextField("contents", reader));
+            doc.add(new TextField("contents", digest(reader), Field.Store.YES));
             writer.addDocument(doc);
         } catch (IOException e) {
             throw new RuntimeException("Failed to open stream for indexing.", e);
         }
+    }
+
+    private String digest(BufferedReader reader) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line).append("\n");
+        }
+        return sb.toString();
     }
 }
