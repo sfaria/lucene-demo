@@ -1,4 +1,4 @@
-package com.demo;
+package com.demo.web;
 
 import static spark.Spark.externalStaticFileLocation;
 import static spark.Spark.get;
