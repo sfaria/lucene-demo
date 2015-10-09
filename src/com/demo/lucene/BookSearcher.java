@@ -54,6 +54,7 @@ public final class BookSearcher {
             Document doc = searcher.doc(docId);
             String text = doc.get("content");
             TokenStream tokenStream = getTokenStream(docId, searcher);
+            // use streams! that's awesome.
             TextFragment[] fragments = highlighter.getBestTextFragments(tokenStream, text, false, 5);
             List<String> matches = new ArrayList<>();
             for (int j = 0; j < fragments.length; j++) {
