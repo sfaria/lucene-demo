@@ -1,8 +1,7 @@
 *.class
-client/libs/*
-books
-index
-server/target
+books/*
+index/*
+target
 
 # Package Files #
 *.jar

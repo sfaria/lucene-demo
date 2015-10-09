@@ -2,7 +2,9 @@ package com.demo.web;
 
 import com.demo.lucene.BookIndexer;
 import com.demo.lucene.BookSearcher;
+import spark.Spark;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -32,23 +34,37 @@ public final class BookSearchServer {
 
         // configure spark
         port(9090);
-        externalStaticFileLocation("client");
+        staticFileLocation("resources");
 
         // server routes
         exception(Exception.class, (e, request, response) -> {
-            response.status(500);
             StringWriter stringWriter = new StringWriter();
             PrintWriter printWriter = new PrintWriter(stringWriter);
             e.printStackTrace(printWriter);
-            response.body(stringWriter.toString());
+            e.printStackTrace(System.err);
+
+            response.status(500);
+            response.type("text/html");
+            response.body(
+            "<!DOCTYPE html>\n" +
+            "<html>\n" +
+            "<body>\n" +
+            "   <h2>500: Something went way, way wrong!</h2>\n" +
+            "   <pre><code>\n"
+                    + stringWriter.toString() + "\n" +
+            "   </code></pre>\n" +
+            "</body>\n" +
+            "</html>"
+            );
         });
 
-        get("/", (request, response) -> {
-            byte[] encoded = Files.readAllBytes(Paths.get("client", "index.html"));
+        get("/", "text/html", (request, response) -> {
+            File indexPage = new File(Spark.class.getResource("/resources/index.html").toURI());
+            byte[] encoded = Files.readAllBytes(indexPage.toPath());
             return new String(encoded, StandardCharsets.UTF_8);
         });
 
-        get("/search/:searchText", (request, response) -> {
+        get("/search/:searchText", "application/json", (request, response) -> {
             return searcher.search(request.params(":searchText"));
         }, new ResultJsonTransformer());
 
