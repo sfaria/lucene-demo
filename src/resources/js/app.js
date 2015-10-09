@@ -14,7 +14,15 @@ function performSearch() {
             if (response.length == 0) {
                 resultsDiv.append('No Results Found!');
             } else {
-                resultsDiv.append(`Found ${response.length} results.`);
+                var responseHtml = '';
+                response.forEach((element, index) => {
+                    responseHtml += '<div class=\"search_hit_set\">\n    <ul>\n';
+                    element.matches.forEach((element, index) => {
+                        responseHtml += `   <li>${element}</li>\n`
+                    });
+                    responseHtml += '   </ul>\n</div>\n';
+                });
+                resultsDiv.append(responseHtml);
             }
         },
         error: function() {

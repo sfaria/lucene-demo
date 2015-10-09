@@ -36,13 +36,15 @@ public final class BookSearcher {
 
     public BookSearcher(Path indexPath) throws IOException {
         this.directory = FSDirectory.open(indexPath);
-        this.queryParser = new QueryParser("content", new StandardAnalyzer());
+        this.queryParser = new QueryParser("contents", new StandardAnalyzer());
+        this.queryParser.setAllowLeadingWildcard(true);
     }
 
     // -------------------- Public Methods --------------------
 
     public final List<SearchResult> search(String searchText) throws ParseException, IOException, InvalidTokenOffsetsException {
-        Query query = queryParser.parse(searchText);
+        String queryText = "\"*" + QueryParser.escape(searchText.toLowerCase()) + "*\"";
+        Query query = queryParser.parse(queryText);
         IndexSearcher searcher = createSearcher();
         ScoreDoc[] hits = searcher.search(query, MAX_HITS).scoreDocs;
         Highlighter highlighter = new Highlighter(new QueryScorer(query));
@@ -52,10 +54,9 @@ public final class BookSearcher {
             ScoreDoc hit = hits[i];
             int docId = hit.doc;
             Document doc = searcher.doc(docId);
-            String text = doc.get("content");
+            String text = doc.get("contents");
             TokenStream tokenStream = getTokenStream(docId, searcher);
-            // use streams! that's awesome.
-            TextFragment[] fragments = highlighter.getBestTextFragments(tokenStream, text, false, 5);
+            TextFragment[] fragments = highlighter.getBestTextFragments(tokenStream, text, true, 5);
             List<String> matches = new ArrayList<>();
             for (int j = 0; j < fragments.length; j++) {
                 TextFragment fragment = fragments[j];
@@ -63,7 +64,9 @@ public final class BookSearcher {
                     matches.add(fragment.toString());
                 }
             }
-            results.add(new SearchResult(matches));
+            if (!matches.isEmpty()) {
+                results.add(new SearchResult(matches));
+            }
         }
         return results;
     }
@@ -80,7 +83,7 @@ public final class BookSearcher {
         return TokenSources.getAnyTokenStream(
                 searcher.getIndexReader(),
                 docId,
-                "content",
+                "contents",
                 new StandardAnalyzer()
         );
     }

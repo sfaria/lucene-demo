@@ -30,7 +30,10 @@ public final class BookSearchServer {
         // set up lucene objects
         BookSearcher searcher = new BookSearcher(INDEX_PATH);
         BookIndexer indexer = new BookIndexer(RAW_DATA_PATH, INDEX_PATH);
-        indexer.performFullIndexing();
+
+        if (performStartupIndexing(args)) {
+            indexer.performFullIndexing();
+        }
 
         // configure spark
         port(9090);
@@ -68,5 +71,17 @@ public final class BookSearchServer {
             return searcher.search(request.params(":searchText"));
         }, new ResultJsonTransformer());
 
+    }
+
+    // -------------------- Private Methods --------------------
+
+    private static boolean performStartupIndexing(String[] args) {
+        if (args.length == 1) {
+            String[] arg = args[0].split("=");
+            if (arg[0].equals("indexAtStartup")) {
+                return Boolean.parseBoolean(arg[1]);
+            }
+        }
+        return true;
     }
 }

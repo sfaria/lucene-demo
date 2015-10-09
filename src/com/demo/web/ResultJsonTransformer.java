@@ -14,7 +14,7 @@ final class ResultJsonTransformer implements ResponseTransformer {
 
     // -------------------- Private Variables --------------------
 
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
     // -------------------- Overridden --------------------
 

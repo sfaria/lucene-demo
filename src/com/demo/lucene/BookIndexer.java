@@ -97,7 +97,7 @@ public final class BookIndexer {
         StringBuilder sb = new StringBuilder();
         String line;
         while ((line = reader.readLine()) != null) {
-            sb.append(line).append("\n");
+            sb.append(line.toLowerCase()).append(" ");
         }
         return sb.toString();
     }
