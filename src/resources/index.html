@@ -12,8 +12,14 @@
 
     <body>
         <nav>
-            <span><input id="search_text" value="Enter a quote!" title="Want to find a quote? Type it in here!"/></span>
-            <span><button type="button" onclick="performSearch()">Find it!</button></span>
+            <ul class="nav_ul">
+                <li class="nav_li">
+                    <input class="nav_element" id="search_text" value="Enter a quote!" title="Want to find a quote? Type it in here!"/>
+                </li>
+                <li class="nav_li">
+                    <button class="nav_element" type="button" onclick="performSearch()">Find it!</button>
+                </li>
+            </ul>
         </nav>
 
         <div id="search_results"></div>
