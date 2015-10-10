@@ -27,6 +27,10 @@ public final class BookSearchServer {
     // -------------------- Main --------------------
 
     public static void main(String[] args) throws Exception {
+        // configure spark
+        staticFileLocation("/WEB-INF");
+        port(9090);
+
         // set up lucene objects
         BookSearcher searcher = new BookSearcher(INDEX_PATH);
         BookIndexer indexer = new BookIndexer(RAW_DATA_PATH, INDEX_PATH);
@@ -34,10 +38,6 @@ public final class BookSearchServer {
         if (performStartupIndexing(args)) {
             indexer.performFullIndexing();
         }
-
-        // configure spark
-        port(9090);
-        staticFileLocation("resources");
 
         // server routes
         exception(Exception.class, (e, request, response) -> {
@@ -62,7 +62,7 @@ public final class BookSearchServer {
         });
 
         get("/", "text/html", (request, response) -> {
-            File indexPage = new File(Spark.class.getResource("/resources/index.html").toURI());
+            File indexPage = new File(Spark.class.getResource("/WEB-INF/index.html").toURI());
             byte[] encoded = Files.readAllBytes(indexPage.toPath());
             return new String(encoded, StandardCharsets.UTF_8);
         });
