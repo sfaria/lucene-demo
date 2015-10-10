@@ -13,15 +13,18 @@
     <body>
         <nav>
             <ul class="nav_ul">
-                <li class="nav_li">
-                    <input class="nav_element" id="search_text" value="Enter a quote!" title="Want to find a quote? Type it in here!"/>
+                <li class="nav_li" style="padding-right: 18px">
+                    <label style="color: #FFFFFF; font-size: xx-large; font-weight: bold;">Quote Finder</label>
+                </li>
+                <li class="nav_li" style="padding-right: 12px">
+                    <input style="width: 60em" class="nav_element" id="search_text" value="Enter a quote!" title="Want to find a quote? Type it in here!"/>
                 </li>
                 <li class="nav_li">
-                    <button class="nav_element" type="button" onclick="performSearch()">Find it!</button>
+                    <button onclick="performSearch()">Find it!</button>
                 </li>
             </ul>
         </nav>
 
-        <div id="search_results"></div>
+        <div class="search_div" id="search_results"></div>
     </body>
 </html>
