@@ -15,8 +15,8 @@ import org.apache.lucene.store.FSDirectory;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * @author Scott Faria <scott.faria@gmail.com>
@@ -42,30 +42,24 @@ public final class BookSearcher {
 
     // -------------------- Public Methods --------------------
 
-    public final List<SearchResult> search(String searchText) throws ParseException, IOException, InvalidTokenOffsetsException {
+    public final Set<SearchResult> search(String searchText) throws ParseException, IOException, InvalidTokenOffsetsException {
         String queryText = "\"*" + QueryParser.escape(searchText.toLowerCase()) + "*\"";
         Query query = queryParser.parse(queryText);
         IndexSearcher searcher = createSearcher();
         ScoreDoc[] hits = searcher.search(query, MAX_HITS).scoreDocs;
         Highlighter highlighter = new Highlighter(new QueryScorer(query));
 
-        List<SearchResult> results = new ArrayList<>();
-        for (int i = 0; i < hits.length; i++) {
-            ScoreDoc hit = hits[i];
+        Set<SearchResult> results = new LinkedHashSet<>();
+        for (ScoreDoc hit : hits) {
             int docId = hit.doc;
             Document doc = searcher.doc(docId);
-            String text = doc.get("contents");
             TokenStream tokenStream = getTokenStream(docId, searcher);
-            TextFragment[] fragments = highlighter.getBestTextFragments(tokenStream, text, true, 5);
-            List<String> matches = new ArrayList<>();
-            for (int j = 0; j < fragments.length; j++) {
-                TextFragment fragment = fragments[j];
-                if (fragment != null && fragment.getScore() > 0) {
-                    matches.add(fragment.toString());
-                }
-            }
-            if (!matches.isEmpty()) {
-                results.add(new SearchResult(matches));
+            TextFragment[] fragments = highlighter.getBestTextFragments(tokenStream, doc.get("contents"), true, 1);
+            String context = fragments.length == 1 ? fragments[0].toString() : "";
+            if (!context.trim().isEmpty()) {
+                String author = doc.get("author");
+                String title = doc.get("title");
+                results.add(new SearchResult(author, title, context));
             }
         }
         return results;
