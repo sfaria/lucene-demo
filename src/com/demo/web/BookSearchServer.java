@@ -2,6 +2,7 @@ package com.demo.web;
 
 import com.demo.lucene.BookIndexer;
 import com.demo.lucene.BookSearcher;
+import com.demo.lucene.SearchResult;
 import spark.Spark;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 
 import static spark.Spark.*;
 
@@ -68,7 +70,11 @@ public final class BookSearchServer {
         });
 
         get("/search/:searchText", "application/json", (request, response) -> {
-            return searcher.search(request.params(":searchText"));
+            long startTime = System.currentTimeMillis();
+            Set<SearchResult> searchResults = searcher.search(request.params(":searchText"));
+            long endTime = System.currentTimeMillis();
+            long elapsedTime = Math.max(0L, endTime - startTime);
+            return new SearchResultContainer(elapsedTime, searchResults);
         }, new ResultJsonTransformer());
 
     }

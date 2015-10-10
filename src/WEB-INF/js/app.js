@@ -24,8 +24,9 @@ function performSearch() {
                 if (response.length == 0) {
                     resultsDiv.append('No Results Found!');
                 } else {
-                    var responseHtml = '';
-                    response.forEach((element, index) => {
+                    const results = response.results;
+                    var responseHtml = `Found the following ${results.length} quotes in ${response.elapsed_time}ms:`;
+                    response.results.forEach((element, index) => {
                         responseHtml += '<div class=\"search_hit_set\">\n';
                         responseHtml += `<h2>${element.title} by ${element.author}</h2>`;
                         responseHtml += `"...${element.context}..."`;
