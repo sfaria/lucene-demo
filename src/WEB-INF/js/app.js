@@ -41,3 +41,25 @@ function performSearch() {
         });
     }
 }
+
+function uploadBook() {
+    const selectedFileInput = $("#selected_file");
+    selectedFileInput.click();
+    selectedFileInput.change(() => {
+        const book = selectedFileInput.prop('files')[0];
+        const formData = new FormData();
+        formData.append('content', book);
+        $.ajax({
+            url: '/upload',
+            type: 'POST',
+            processData: false,
+            data: formData,
+            success: function(response) {
+                $('#search_results').empty().append('Thank you for the upload. The book will be searchable shortly.');
+            },
+            error: function() {
+                $('#search_results').empty().append(`Failed to upload \"${book.name}\".`);
+            }
+        })
+    });
+}

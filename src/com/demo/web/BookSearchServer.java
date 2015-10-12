@@ -5,9 +5,7 @@ import com.demo.lucene.BookSearcher;
 import com.demo.lucene.SearchResult;
 import spark.Spark;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,6 +75,20 @@ public final class BookSearchServer {
             return new SearchResultContainer(elapsedTime, searchResults);
         }, new ResultJsonTransformer());
 
+        post("/upload", "multipart/form-data", (request, response) -> {
+            byte[] body = request.bodyAsBytes();
+            if (body == null || body.length == 0) {
+                response.status(400);
+                return "No content was received on the server. Did you upload an empty file?";
+            }
+
+            try (InputStream in = new ByteArrayInputStream(body)) {
+                indexer.addToIndex(in);
+                response.status(200);
+                response.redirect("/");
+                return response;
+            }
+        });
     }
 
     // -------------------- Private Methods --------------------

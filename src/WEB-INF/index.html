@@ -20,11 +20,20 @@
                     <input style="font-size: medium; width: 35em" class="nav_element" id="search_text" title="Want to find a quote? Type it in here!"/>
                 </li>
                 <li class="nav_li">
-                    <button id="submit_search" onclick="performSearch()">Find it!</button>
+                    <button style="padding-right: 8px" id="submit_search" onclick="performSearch()">Find it!</button>
+                </li>
+                <li style="float: right" class="nav_li">
+                    <button style="float: left" id="upload_book" onclick="uploadBook()">Upload Book</button>
                 </li>
             </ul>
         </nav>
 
         <div class="search_div" id="search_results"></div>
+
+        <div style="display: none">
+            <form id="upload_book_form" action="/upload" method="POST" enctype="text/plain">
+                <input type="file" id="selected_file"/>
+            </form>
+        </div>
     </body>
 </html>
