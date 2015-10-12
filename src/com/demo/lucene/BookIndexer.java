@@ -99,13 +99,7 @@ public final class BookIndexer {
     public final void addToIndex(InputStream in) throws IOException {
         try (IndexWriter writer = createWriter()) {
             indexRecord(in, writer);
-            Document indexStats = getIndexDocument();
-            int documentCount = Integer.valueOf(indexStats.get("document_count"));
-            indexStats.removeField("document_count");
-            indexStats.add(new LongField("document_count", documentCount + 1, Field.Store.YES));
-            indexStats.removeField("last_update_date");
-            indexStats.add(new LongField("last_update_date", new Date().getTime(), Field.Store.YES));
-            writer.updateDocument(new Term("id", "index_stats"), indexStats);
+            updateIndexStatistics(writer);
             writer.commit();
         } catch (ParseException | IOException e) {
             throw new RuntimeException("Failed to open stream for indexing.", e);
@@ -113,6 +107,16 @@ public final class BookIndexer {
     }
 
     // -------------------- Private Methods --------------------
+
+    private void updateIndexStatistics(IndexWriter writer) throws ParseException, IOException {
+        Document indexStats = getIndexDocument();
+        int documentCount = Integer.valueOf(indexStats.get("document_count"));
+        indexStats.removeField("document_count");
+        indexStats.add(new LongField("document_count", documentCount + 1, Field.Store.YES));
+        indexStats.removeField("last_update_date");
+        indexStats.add(new LongField("last_update_date", new Date().getTime(), Field.Store.YES));
+        writer.updateDocument(new Term("id", "index_stats"), indexStats);
+    }
 
     private final IndexWriter createWriter() throws IOException {
         IndexWriterConfig writerConfig = new IndexWriterConfig(new StandardAnalyzer());
