@@ -1,4 +1,4 @@
-package com.demo.lucene;
+package com.demo.web;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 /**
  * @author Scott Faria <scott.faria@gmail.com>
  */
-public final class SearchResult {
+public final class SearchResult implements Jsonable {
     // -------------------- Private Variables --------------------
 
     private final String author;
@@ -21,8 +21,9 @@ public final class SearchResult {
         this.contextMatch = contextMatch;
     }
 
-    // -------------------- Public Methods --------------------
+    // -------------------- Overridden Methods --------------------
 
+    @Override
     public final JsonElement toJson() {
         JsonObject matchesObject = new JsonObject();
         matchesObject.addProperty("author", author);
@@ -30,9 +31,6 @@ public final class SearchResult {
         matchesObject.addProperty("context", contextMatch);
         return matchesObject;
     }
-
-    // -------------------- Overridden Methods --------------------
-
 
     @Override
     public boolean equals(Object o) {

@@ -16,6 +16,6 @@ final class ResultJsonTransformer implements ResponseTransformer {
 
     @Override
     public final String render(Object model) throws Exception {
-        return gson.toJson(((SearchResultContainer) model).toJson());
+        return gson.toJson(((Jsonable) model).toJson());
     }
 }

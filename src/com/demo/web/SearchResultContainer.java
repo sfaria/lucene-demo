@@ -1,6 +1,5 @@
 package com.demo.web;
 
-import com.demo.lucene.SearchResult;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -10,7 +9,7 @@ import java.util.Collection;
 /**
  * @author Scott Faria <scott.faria@gmail.com>
  */
-final class SearchResultContainer {
+final class SearchResultContainer implements Jsonable {
 
     // -------------------- Private Variables --------------------
 
@@ -24,9 +23,10 @@ final class SearchResultContainer {
         this.results = results;
     }
 
-    // -------------------- Default Methods --------------------
+    // -------------------- Overridden Methods --------------------
 
-    final JsonElement toJson() {
+    @Override
+    public final JsonElement toJson() {
         JsonObject containerJson = new JsonObject();
         containerJson.addProperty("elapsed_time", elapsedTime);
         JsonArray docArray = new JsonArray();

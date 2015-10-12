@@ -1,5 +1,7 @@
 package com.demo.lucene;
 
+import com.demo.web.IndexStats;
+import com.demo.web.SearchResult;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -41,6 +43,20 @@ public final class BookSearcher {
     }
 
     // -------------------- Public Methods --------------------
+
+    public final IndexStats getIndexStats() throws ParseException, IOException {
+        Query query = queryParser.parse("id:index_stats");
+        IndexSearcher searcher = createSearcher();
+        ScoreDoc[] hits = searcher.search(query, 1).scoreDocs;
+        if (hits.length != 1) {
+            throw new ParseException("Failed to get index stats from lucene.");
+        }
+        Document doc = searcher.doc(hits[0].doc);
+        long createdDate = Long.valueOf(doc.get("creation_date"));
+        long lastUpdateDate = Long.valueOf(doc.get("last_update_date"));
+        int documentCount = Integer.valueOf(doc.get("document_count"));
+        return new IndexStats(documentCount, lastUpdateDate, createdDate);
+    }
 
     public final Set<SearchResult> search(String searchText) throws ParseException, IOException, InvalidTokenOffsetsException {
         String queryText = "\"*" + QueryParser.escape(searchText.toLowerCase()) + "*\"";

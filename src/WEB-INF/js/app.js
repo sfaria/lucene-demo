@@ -9,6 +9,20 @@ $(document).ready(function () {
             $("#submit_search").click();
         }
     });
+
+    $.ajax({
+        url: '/stats',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            $('#search_results')
+                .empty()
+                .append(`${response.document_count} books have been searchable since ${response.creation_date}. The last book was uploaded on ${response.last_update_date}`);
+        },
+        error: function() {
+            $('#search_results').empty().append('Something went way wrong getting index stats from the server.');
+        }
+    })
 });
 
 function performSearch() {
@@ -55,7 +69,7 @@ function uploadBook() {
             processData: false,
             data: formData,
             success: function(response) {
-                $('#search_results').empty().append('Thank you for the upload. The book will be searchable shortly.');
+                $('#search_results').empty().append(response);
             },
             error: function() {
                 $('#search_results').empty().append(`Failed to upload \"${book.name}\".`);

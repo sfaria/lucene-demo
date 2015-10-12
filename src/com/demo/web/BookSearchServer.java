@@ -2,10 +2,10 @@ package com.demo.web;
 
 import com.demo.lucene.BookIndexer;
 import com.demo.lucene.BookSearcher;
-import com.demo.lucene.SearchResult;
 import spark.Spark;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,6 +67,10 @@ public final class BookSearchServer {
             return new String(encoded, StandardCharsets.UTF_8);
         });
 
+        get("/stats", "application/json", (request, response) -> {
+            return searcher.getIndexStats();
+        }, new ResultJsonTransformer());
+
         get("/search/:searchText", "application/json", (request, response) -> {
             long startTime = System.currentTimeMillis();
             Set<SearchResult> searchResults = searcher.search(request.params(":searchText"));
@@ -76,17 +80,16 @@ public final class BookSearchServer {
         }, new ResultJsonTransformer());
 
         post("/upload", "multipart/form-data", (request, response) -> {
-            byte[] body = request.bodyAsBytes();
-            if (body == null || body.length == 0) {
+            String body = request.body();
+            if (body == null || body.isEmpty()) {
                 response.status(400);
                 return "No content was received on the server. Did you upload an empty file?";
             }
 
-            try (InputStream in = new ByteArrayInputStream(body)) {
+            try (InputStream in = new ByteArrayInputStream(body.getBytes(Charset.forName("UTF-8")))) {
                 indexer.addToIndex(in);
                 response.status(200);
-                response.redirect("/");
-                return response;
+                return "Thank you for the upload. The book will be searchable shortly.";
             }
         });
     }
